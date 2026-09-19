@@ -1,14 +1,14 @@
 import asyncio
 import logging
+import os
 from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
-# --- ТОКЕНИ ТА ПОСИЛАННЯ ---
-BOT_TOKEN = "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo
-"
-WEB_APP_URL = "https://eror8086-cmyk.github.io/bot/"  # Ваше посилання GitHub Pages
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo
+")
+WEB_APP_URL = "https://eror8086-cmyk.github.io/bot/"
 
 try:
     asyncio.get_running_loop()
@@ -44,12 +44,14 @@ async def start_web_server():
     app.router.add_get('/', handle_ping)
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    port = int(os.getenv("PORT", 10000))
+    site = web.TCPSite(runner, '0.0.0.0', port)
     await site.start()
 
 async def main():
     logging.basicConfig(level=logging.INFO)
-    await start_web_server()
+    # Запускаємо веб-сервер у фоні, щоб Render не падав за Timed Out
+    asyncio.create_task(start_web_server())
     print("Бот успішно запущений!")
     await dp.start_polling(bot)
 
