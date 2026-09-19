@@ -6,10 +6,11 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo
-")
+# --- ТОКЕНИ ТА ПОСИЛАННЯ ---
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo")
 WEB_APP_URL = "https://eror8086-cmyk.github.io/bot/"
 
+# Фікс циклу подій для Python
 try:
     asyncio.get_running_loop()
 except RuntimeError:
@@ -50,7 +51,7 @@ async def start_web_server():
 
 async def main():
     logging.basicConfig(level=logging.INFO)
-    # Запускаємо веб-сервер у фоні, щоб Render не падав за Timed Out
+    # Фоновий запуск веб-сервера, щоб Render не кидав Timed Out
     asyncio.create_task(start_web_server())
     print("Бот успішно запущений!")
     await dp.start_polling(bot)
