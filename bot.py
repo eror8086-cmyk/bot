@@ -7,7 +7,7 @@ from aiocryptopay import AioCryptoPay, Networks
 
 # --- ВСТАВТЕ ВАШІ ТОКЕНИ СЮДИ ---
 BOT_TOKEN = "8668016567:AAEFfz-VOoRli10CXpl-3JxYQmj92Ofmxic"
-CRYPTO_PAY_TOKEN = 636094:AAShd4R213wDF5ZY8FZHVfJ02C5RDVqQ7ok"
+CRYPTO_PAY_TOKEN = "636094:AAShd4R213wDF5ZY8FZHVfJ02C5RDVqQ7ok"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
