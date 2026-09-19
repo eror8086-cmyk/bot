@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiocryptopay import AioCryptoPay, Networks
 
 # --- ТОКЕНИ ---
-BOT_TOKEN = "8668016567:AAEFfz-VOoRli10CXpl-3JxYQmj92Ofmxic"
+BOT_TOKEN = "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo"
 CRYPTO_PAY_TOKEN = "636094:AAShd4R213wDF5ZY8FZHVfJ02C5RDVqQ7ok"
 
 # Фікс циклу подій для Python 3.14
