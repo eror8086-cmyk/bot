@@ -1,15 +1,15 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types, F
+from aiohttp import web
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiocryptopay import AioCryptoPay, Networks
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
-# --- ТОКЕНИ ---
-BOT_TOKEN = "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo"
-CRYPTO_PAY_TOKEN = "636094:AAShd4R213wDF5ZY8FZHVfJ02C5RDVqQ7ok"
+# --- ТОКЕНИ ТА ПОСИЛАННЯ ---
+BOT_TOKEN = "8668016567:AAE0paiP1abF7YF8Ydm2B96-lmODTPBU5Wo
+"
+WEB_APP_URL = "https://eror8086-cmyk.github.io/bot/"  # Ваше посилання GitHub Pages
 
-# Фікс циклу подій для Python 3.14
 try:
     asyncio.get_running_loop()
 except RuntimeError:
@@ -17,58 +17,39 @@ except RuntimeError:
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
-crypto = AioCryptoPay(token=CRYPTO_PAY_TOKEN, network=Networks.MAIN_NET)
-
-users_db = {}
-
-def get_user_data(user_id):
-    if user_id not in users_db:
-        users_db[user_id] = {"hashrate": 10, "balance": 0.0}
-    return users_db[user_id]
 
 def main_keyboard():
     kb = [
-        [InlineKeyboardButton(text="⛏ Майнінг", callback_data="mining")],
-        [InlineKeyboardButton(text="⚡ Купити хешрейт (USDT)", callback_data="buy_hashrate")],
-        [InlineKeyboardButton(text="💰 Профіль", callback_data="profile")]
+        [InlineKeyboardButton(
+            text="🚀 Запустити CryptoMiner App", 
+            web_app=WebAppInfo(url=WEB_APP_URL)
+        )]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 @dp.message(Command("start"))
 async def start_cmd(message: types.Message):
-    get_user_data(message.from_user.id)
     await message.answer(
-        "👋 Вітаємо у майнінг-боті!\n\nОтримуйте пасивний дохід та збільшуйте свій хешрейт.",
+        "👋 Вітаємо у **CryptoMiner App**!\n\n"
+        "Натисніть кнопку нижче, щоб відкрити додаток для майнінгу криптовалют (BTC, ETH, SOL, TRX, BNB):",
+        parse_mode="Markdown",
         reply_markup=main_keyboard()
     )
 
-@dp.callback_query(F.data == "profile")
-async def profile_handler(callback: types.CallbackQuery):
-    data = get_user_data(callback.from_user.id)
-    text = (
-        f"📊 **Ваш профіль:**\n\n"
-        f"⚡ Хешрейт: **{data['hashrate']} GH/s**\n"
-        f"💰 Баланс: **{data['balance']:.4f} USDT**"
-    )
-    await callback.message.edit_text(text, parse_mode="Markdown", reply_markup=main_keyboard())
+async def handle_ping(request):
+    return web.Response(text="Bot is active!")
 
-@dp.callback_query(F.data == "buy_hashrate")
-async def buy_hashrate_handler(callback: types.CallbackQuery):
-    invoice = await crypto.create_invoice(asset="USDT", amount=1.0, description="Купівля +50 GH/s хешрейту")
-    
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Оплатити 1 USDT", url=invoice.bot_invoice_url)],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="profile")]
-    ])
-    
-    await callback.message.edit_text(
-        "⚡ **Збільшення хешрейту:**\n\nЦіна: **1 USDT** за **+50 GH/s**.\nНатисніть кнопку нижче для оплати:",
-        parse_mode="Markdown",
-        reply_markup=kb
-    )
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get('/', handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    await site.start()
 
 async def main():
     logging.basicConfig(level=logging.INFO)
+    await start_web_server()
     print("Бот успішно запущений!")
     await dp.start_polling(bot)
 
