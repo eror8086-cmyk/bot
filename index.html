@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>CryptoMiner App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #151a23;
+            --accent-blue: #0088cc;
+            --accent-neon: #00f2fe;
+            --text-main: #ffffff;
+            --text-sub: #8a96a3;
+            --green: #00e676;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #18202c, #11151c);
+            border: 1px solid #232d3d;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .balance-title {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+
+        .balance-val {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-neon);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .crypto-selector {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+
+        .coin-btn {
+            background: var(--card-bg);
+            border: 1px solid #283344;
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .coin-btn.active {
+            background: linear-gradient(90deg, #0088cc, #00f2fe);
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 136, 204, 0.5);
+        }
+
+        .btn-action {
+            width: 100%;
+            background: linear-gradient(90deg, #0088cc, #00f2fe);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #10141d;
+            border-top: 1px solid #1c2533;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            font-size: 11px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--accent-neon);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Вкладка Головна -->
+        <div id="tab-home" class="tab-content active">
+            <div class="card">
+                <div class="balance-title">Загальний баланс (USDT)</div>
+                <div class="balance-val" id="total-balance">12.4876 USDT</div>
+            </div>
+
+            <div class="balance-title">Виберіть актив для майнінгу:</div>
+            <div class="crypto-selector">
+                <button class="coin-btn active" onclick="selectCoin('BTC', this)">⚡ BTC</button>
+                <button class="coin-btn" onclick="selectCoin('ETH', this)">💎 ETH</button>
+                <button class="coin-btn" onclick="selectCoin('SOL', this)">☀️ SOL</button>
+                <button class="coin-btn" onclick="selectCoin('TRX', this)">🔴 TRX</button>
+                <button class="coin-btn" onclick="selectCoin('BNB', this)">🟡 BNB</button>
+            </div>
+
+            <div class="card">
+                <div class="balance-title" id="active-coin-title">Поточна монета: BTC</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <span>Хешрейт:</span>
+                    <strong style="color: var(--green);">125.4 TH/s</strong>
+                </div>
+            </div>
+
+            <button class="btn-action" onclick="switchTab('farm')">🚀 Перейти до майнінгу</button>
+        </div>
+
+        <!-- Вкладка Ферма -->
+        <div id="tab-farm" class="tab-content">
+            <div class="card" style="text-align: center;">
+                <h2>⛏ Майнінг у процесі...</h2>
+                <p style="color: var(--text-sub); font-size: 13px;">Ваша ферма працює 24/7</p>
+                <div class="balance-val" id="mined-amount" style="margin: 20px 0;">0.000354 BTC</div>
+                <button class="btn-action">Зібрати прибуток</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Магазин -->
+        <div id="tab-shop" class="tab-content">
+            <div class="card">
+                <h3>⚡ Покупка Хешрейту</h3>
+                <p style="color: var(--text-sub);">Купуйте прискорювачі за USDT через CryptoBot</p>
+                <button class="btn-action" onclick="buyHashrate()">Купити +50 TH/s (1 USDT)</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Профіль -->
+        <div id="tab-profile" class="tab-content">
+            <div class="card">
+                <h3>👤 Ваш профіль</h3>
+                <p id="user-id">ID: Завантаження...</p>
+                <p>Статус: <strong style="color: var(--green);">VIP Miner</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижня навігаційна панель -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <div class="nav-icon">🏠</div>
+            <div>Головна</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('farm', this)">
+            <div class="nav-icon">⛏</div>
+            <div>Ферма</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('shop', this)">
+            <div class="nav-icon">🛒</div>
+            <div>Магазин</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <div class="nav-icon">👤</div>
+            <div>Профіль</div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('user-id').innerText = 'ID: ' + tg.initDataUnsafe.user.id;
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            if (el) el.classList.add('active');
+        }
+
+        function selectCoin(coin, btn) {
+            document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('active-coin-title').innerText = 'Поточна монета: ' + coin;
+        }
+
+        function buyHashrate() {
+            tg.sendData(JSON.stringify({ action: "buy_hashrate" }));
+        }
+    </script>
+</body>
+</html>
 
